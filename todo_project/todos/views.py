@@ -17,7 +17,7 @@ from rest_framework.permissions import AllowAny
 class TodosView(generics.ListCreateAPIView):
     queryset = ToDo.objects.all()
     serializer_class = ToDoSerializer
-    permission_classes = [permissions.IsAuthenticated]  # Token protection
+    permission_classes = [permissions.AllowAny]  # Token protection
 
     @swagger_auto_schema(
         operation_description="Get the list of Todos",
@@ -65,7 +65,7 @@ class TodoDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = ToDo.objects.all()
     serializer_class = ToDoSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     @swagger_auto_schema(
         operation_description="Get, update, or delete a specific Todo item",
@@ -178,17 +178,13 @@ class LoginAPIView(APIView):
         # Authenticate user
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            if user.is_staff:
-                # User is active, allow login
-                # Generate JWT tokens
-                refresh = RefreshToken.for_user(user)
-                return Response({
-                    'refresh': str(refresh),
-                    'access': str(refresh.access_token),
-                    'message': 'Login successful!'
-                }, status=status.HTTP_200_OK)
-            else:
-                return Response({'error': 'User is not staff'}, status=status.HTTP_401_UNAUTHORIZED)     
+            # Generate JWT tokens
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'message': 'Login successful!'
+            }, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
 
